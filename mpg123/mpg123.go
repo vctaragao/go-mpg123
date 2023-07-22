@@ -49,37 +49,19 @@ type Decoder struct {
 	handle *C.mpg123_handle
 }
 
-// init initializes the mpg123 library when package is loaded
-func init() {
-	err := C.mpg123_init()
-	if err != C.MPG123_OK {
-		//return fmt.Errorf("error initializing mpg123")
-		panic("failed to initialize mpg123")
-	}
-	//return nil
-}
-
-///////////////////////////
-// DECODER INSTANCE CODE //
-///////////////////////////
-
 // NewDecoder creates a new mpg123 decoder instance
-func NewDecoder(decoder string) (*Decoder, error) {
+func NewDecoder() (*Decoder, error) {
 	var err C.int
 	var mh *C.mpg123_handle
-	if decoder != "" {
-		mh = C.mpg123_new(nil, &err)
-	} else {
-		cdecoder := C.CString(decoder)
-		defer C.free(unsafe.Pointer(cdecoder))
-		mh = C.mpg123_new(cdecoder, &err)
-	}
+
+	mh = C.mpg123_new(nil, &err)
 	if mh == nil {
 		errstring := C.mpg123_plain_strerror(err)
 		err := C.GoString(errstring)
 		C.free(unsafe.Pointer(errstring))
 		return nil, fmt.Errorf("error initializing mpg123 decoder: %s", err)
 	}
+
 	dec := new(Decoder)
 	dec.handle = mh
 	return dec, nil
@@ -90,15 +72,11 @@ func (d *Decoder) Delete() {
 	C.mpg123_delete(d.handle)
 }
 
-// returns a string containing the most recent error message corresponding to
+// streeror returns a string containing the most recent error message corresponding to
 // an mpg123 decoder instance
 func (d *Decoder) strerror() string {
 	return C.GoString(C.mpg123_strerror(d.handle))
 }
-
-////////////////////////
-// OUTPUT FORMAT CODE //
-////////////////////////
 
 // FormatNone disables all decoder output formats (used to specifying supported formats)
 func (d *Decoder) FormatNone() {
@@ -168,13 +146,16 @@ func (d *Decoder) Close() error {
 // Read decodes data and into buf and returns number of bytes decoded.
 func (d *Decoder) Read(buf []byte) (int, error) {
 	var done C.size_t
+
 	err := C.do_mpg123_read(d.handle, (unsafe.Pointer)(&buf[0]), C.size_t(len(buf)), &done)
 	if err == C.MPG123_DONE {
 		return int(done), EOF
 	}
+
 	if err != C.MPG123_OK {
 		return int(done), fmt.Errorf("mpg123 error: %s", d.strerror())
 	}
+
 	return int(done), nil
 }
 
@@ -190,8 +171,13 @@ func (d *Decoder) Feed(buf []byte) error {
 // Feed provides data bytes into the decoder
 func (d *Decoder) Seek(offset int16, set int) (int16, error) {
 	offsetReached := C.mpg123_seek(d.handle, C.off_t(offset), C.int(set))
-    if offsetReached < 0 {
-        return 0, fmt.Errorf("mpg123 error: %s", d.strerror())
+	if offsetReached < 0 {
+		return 0, fmt.Errorf("mpg123 error: %s", d.strerror())
 	}
-	return int16(offsetReached), nil 
+	return int16(offsetReached), nil
+}
+
+func (d *Decoder) OutBlock() int {
+	minBufferSize := C.mpg123_outblock(d.handle)
+	return int(minBufferSize)
 }
