@@ -1,7 +1,12 @@
+Prelog
+------------
+_This library is an expand version of the https://github.com/bobertlo/go-mpg123_
+
+Addition to this library:
+- Support for [libout123](https://www.mpg123.de/api/group__out123__api.shtml) to audio encode and playback
 
 Introduction
 ------------
-
 go-mpg123 is a library that provides bindings to libmpg123.
 
 Not all library functions are present, but there are enough bindings to
