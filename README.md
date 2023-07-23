@@ -50,9 +50,8 @@ when EOF is returned, so check for errors after processing the buffer.
 
 Examples
 --------
-
-An example program is included in examples/mp3dump. This program decodes
-an MP3 file and writes the raw PCM data to a file.
+### mp3dump.
+This program decodesan MP3 file and writes the raw PCM data to a file.
 
 	go get github.com/bobertlo/go-mpg123/examples/mp3dump
 	mp3dump <file.mp3> <outfile.raw>
@@ -60,3 +59,9 @@ an MP3 file and writes the raw PCM data to a file.
 This raw audio file may be played using mplayer:
 
 	mplayer -demuxer rawaudio -rawaudio rate=<samplerate>:channels=<channels> out.raw
+ 
+### play from file
+This program decodes an MP3 file and plays it using the default playout device 
+
+	go get github.com/bobertlo/go-mpg123/examples/play_from_file
+	mp3play <file.mp3>
