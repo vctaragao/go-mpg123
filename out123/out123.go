@@ -136,3 +136,15 @@ func (e *Encoder) Play(buffer []byte, readyToRead int) int {
 	read := C.out123_play(e.handle, unsafe.Pointer(&buffer[0]), C.size_t(readyToRead))
 	return int(read)
 }
+
+func (e *Encoder) Pause() {
+	C.out123_pause(e.handle)
+}
+
+func (e *Encoder) Stop() {
+	C.out123_stop(e.handle)
+}
+
+func (e *Encoder) Drop() {
+	C.out123_drop(e.handle)
+}

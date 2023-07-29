@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/vctaragao/go-mpg123/mpg123"
 	"github.com/vctaragao/go-mpg123/out123"
@@ -59,6 +60,12 @@ func main() {
 	buffer_size_default := decoder.OutBlock()
 	buffer_size := buffer_size_default * ((int(rate) * framesize / buffer_size_default) * SECONDS)
 	buff := make([]byte, buffer_size)
+
+	go func() {
+		time.Sleep(5 * time.Second)
+		fmt.Println("Volume change to 5")
+		decoder.VolumeChange(5)
+	}()
 
 	for {
 		done, err := decoder.Read(buff)

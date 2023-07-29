@@ -101,10 +101,6 @@ func (d *Decoder) Format(rate int64, channels int, encodings int) {
 	C.mpg123_format(d.handle, C.long(rate), C.int(channels), C.int(encodings))
 }
 
-/////////////////////////////
-// INPUT AND DECODING CODE //
-/////////////////////////////
-
 // Open initializes a decoder for an mp3 file using a filename
 func (d *Decoder) Open(file string) error {
 	cfile := C.CString(file)
@@ -180,4 +176,11 @@ func (d *Decoder) Seek(offset int16, set int) (int16, error) {
 func (d *Decoder) OutBlock() int {
 	minBufferSize := C.mpg123_outblock(d.handle)
 	return int(minBufferSize)
+}
+
+func (d *Decoder) VolumeChange(value float32) error {
+	if err := C.mpg123_volume_change(d.handle, C.double(value)); err != C.MPG123_OK {
+		return fmt.Errorf("unable to change volume: %s", d.strerror())
+	}
+	return nil
 }
